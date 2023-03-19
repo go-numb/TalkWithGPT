@@ -13,10 +13,10 @@ VoiceVoxを導入すれば、可愛い声でも喋ります。
 ```
 $ git clone this repo
 $ cd thisDir/frontend && npm i
-$ npm run dev
 $ cd ../
 $ export CHATGPTTOKEN="xxxxxxxxxxxxxx"
 $ go run main.go
+// go runを行うことでフロントエンドが立ち上がるようにしました
 
 ```
 
