@@ -56,19 +56,26 @@ func (p *Client) Request(c echo.Context) error {
 
 	q := strings.ToLower(message)
 	if q == "reset" {
-		his = []gogpt.ChatCompletionMessage{}
+		// System command promptsを残す
+		his = []gogpt.ChatCompletionMessage{
+			his[0],
+		}
 		return c.JSON(http.StatusOK, map[string]any{
 			"code":  "success, reset histories",
 			"error": "success",
 		})
 	} else if q == "リセット" {
-		his = []gogpt.ChatCompletionMessage{}
+		his = []gogpt.ChatCompletionMessage{
+			his[0],
+		}
 		return c.JSON(http.StatusOK, map[string]any{
 			"code":  "success, reset histories",
 			"error": "success",
 		})
 	} else if strings.HasPrefix(q, "履歴リセット") {
-		his = []gogpt.ChatCompletionMessage{}
+		his = []gogpt.ChatCompletionMessage{
+			his[0],
+		}
 		return c.JSON(http.StatusOK, map[string]any{
 			"code":  "success, reset histories",
 			"error": "success",

@@ -1,11 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
 	"talkgpt/api"
 	"talkgpt/view"
+
+	"github.com/rs/zerolog/log"
 )
 
 const (
@@ -32,9 +33,8 @@ func command() {
 
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-
 	err := cmd.Run()
 	if err != nil {
-		fmt.Println("Error:", err)
+		log.Err(err).Msg("")
 	}
 }
