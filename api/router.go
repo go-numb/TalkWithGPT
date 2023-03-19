@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-numb/go-bouyomichan"
 	"github.com/go-numb/go-voicevox"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -19,6 +20,7 @@ import (
 type Client struct {
 	ctx      context.Context
 	gpt      *gogpt.Client
+	bouyomi  *bouyomichan.Client
 	voicevox *voicevox.Client
 }
 
@@ -32,6 +34,7 @@ func New() *Client {
 	return &Client{
 		ctx:      context.Background(),
 		gpt:      gogpt.NewClient(os.Getenv("CHATGPTTOKEN")),
+		bouyomi:  bouyomichan.New("localhost:50001"),
 		voicevox: v,
 	}
 }
@@ -77,7 +80,7 @@ func (p *Client) Request(c echo.Context) error {
 		})
 	}
 
-	ctx, cancel := context.WithTimeout(p.ctx, 30*time.Second)
+	ctx, cancel := context.WithTimeout(p.ctx, 60*time.Second)
 	defer cancel()
 
 	his = append(his, gogpt.ChatCompletionMessage{
@@ -102,6 +105,7 @@ func (p *Client) Request(c echo.Context) error {
 		Content: res.Choices[0].Message.Content,
 	})
 
+	go p.BouyomiSpeaking(res.Choices[0].Message.Content)
 	go p.VoxSpeaking(res.Choices[0].Message.Content)
 
 	return c.JSON(http.StatusOK, map[string]any{
@@ -110,7 +114,7 @@ func (p *Client) Request(c echo.Context) error {
 }
 
 func (p *Client) SetPrompt(q string) {
-	ctx, cancel := context.WithTimeout(p.ctx, 30*time.Second)
+	ctx, cancel := context.WithTimeout(p.ctx, 60*time.Second)
 	defer cancel()
 
 	his = append(his, gogpt.ChatCompletionMessage{
@@ -137,6 +141,36 @@ func (p *Client) SetPrompt(q string) {
 		Content: res.Choices[0].Message.Content,
 	})
 	log.Info().Msg(res.Choices[0].Message.Content)
+}
+
+func (p *Client) BouyomiSpeaking(s string) {
+	p.bouyomi.Speed = 110
+	p.bouyomi.Tone = 120
+	p.bouyomi.Voice = bouyomichan.VoiceDefault
+	p.bouyomi.Volume = 60
+	if err := p.bouyomi.Speaking(s); err != nil {
+		log.Err(err).Msg("")
+		return
+	}
+
+	ctx, cacel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cacel()
+
+L:
+	for {
+		select {
+		case <-ctx.Done():
+			if err := p.bouyomi.Stop(); err != nil {
+				log.Err(fmt.Errorf("[ERROR] bouyomi stoped error, %v", err)).Msg("")
+			}
+			break L
+		default:
+			if !p.bouyomi.IsNowPlayng() {
+				break
+			}
+			time.Sleep(time.Second)
+		}
+	}
 }
 
 // VoxSpeaking メモリ使用しまくり

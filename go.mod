@@ -3,6 +3,7 @@ module talkgpt
 go 1.20
 
 require (
+	github.com/go-numb/go-bouyomichan v0.0.0-20230302235630-118c2426df2d
 	github.com/go-numb/go-voicevox v0.0.0-20230211204959-e433f5c83d0b
 	github.com/labstack/echo/v4 v4.10.2
 	github.com/rs/zerolog v1.29.0
