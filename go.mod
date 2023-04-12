@@ -12,6 +12,8 @@ require (
 )
 
 require (
+	github.com/go-numb/my-prompts v0.0.0-20230319151429-90a0464c621c // indirect
+	github.com/gocarina/gocsv v0.0.0-20230226133904-70c27cb2918a // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/hajimehoshi/oto v1.0.1 // indirect
 	github.com/labstack/gommon v0.4.0 // indirect
@@ -24,7 +26,7 @@ require (
 	golang.org/x/image v0.0.0-20190227222117-0694c2d4d067 // indirect
 	golang.org/x/mobile v0.0.0-20190415191353-3e0bab5405d6 // indirect
 	golang.org/x/net v0.7.0 // indirect
-	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/sys v0.6.0 // indirect
 	golang.org/x/text v0.7.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 )

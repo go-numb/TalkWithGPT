@@ -17,7 +17,7 @@ function App() {
     const [loading, setLoading] = useState(false);
     const sendToChatGPT = async () => {
         setLoading(true);
-        const res = await fetch(`http://localhost:8080/api/${transcript}`)
+        const res = await fetch(`http://localhost:8081/api/${transcript}`)
         const result = await res.json();
         const utterThis = new SpeechSynthesisUtterance(result.answer);
         utterThis.voice = synth.getVoices()[2];
