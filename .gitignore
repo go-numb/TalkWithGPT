@@ -1,2 +1,4 @@
 node_modules
 *.exe
+_data/*.txt
+_data/*.md

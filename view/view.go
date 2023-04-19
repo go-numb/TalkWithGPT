@@ -13,7 +13,7 @@ func Web(isDebug bool) {
 	defer w.Destroy()
 
 	w.SetTitle("Talk with ChatGPT")
-	w.SetSize(480, 490, webview.HintFixed)
+	w.SetSize(480, 490, webview.HintNone)
 	// w.SetHtml(string(b))
 	w.Navigate("http://localhost:5173/")
 	w.Run()

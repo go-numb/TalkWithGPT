@@ -6,6 +6,11 @@ import { debounce } from 'underscore';
 const synth = window.speechSynthesis;
 // SpeechRecognition.startListening({ language: 'zh-CN' })
 
+import ReactMarkdown from 'react-markdown'
+import remarkMath from 'remark-math'
+import rehypeKatex from 'rehype-katex'
+import 'katex/dist/katex.min.css'
+
 function App() {
     const {
         transcript,
@@ -37,7 +42,7 @@ function App() {
     return (
         <div className="App">
             <div>
-                <p>Microphone: {listening ? 'on' : 'off'}</p>
+                <p>Mic: {listening ? 'on' : 'off'}</p>
                 <button onClick={() => SpeechRecognition.startListening({
                     language: 'ja'
                 })}>Start</button>
@@ -50,9 +55,13 @@ function App() {
                     <div className="inner three"></div>
                 </div>
                     : ''}
-                <p>{gptResponse}</p>
+                <ReactMarkdown
+                    rehypePlugins={[rehypeKatex]}
+                    remarkPlugins={[remarkMath]}>
+                    {gptResponse}
+                </ReactMarkdown>
             </div>
-        </div>
+        </div >
     )
 }
 

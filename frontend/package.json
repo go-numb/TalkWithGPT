@@ -12,7 +12,10 @@
     "babel-polyfill": "^6.26.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-markdown": "^8.0.7",
     "react-speech-recognition": "^3.10.0",
+    "rehype-katex": "^6.0.2",
+    "remark-math": "^5.1.1",
     "underscore": "^1.13.6"
   },
   "devDependencies": {
