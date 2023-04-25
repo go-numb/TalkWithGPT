@@ -1,0 +1,134 @@
+package api
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"io"
+	"net/http"
+	"strings"
+	"time"
+
+	"github.com/labstack/echo/v4"
+	gogpt "github.com/sashabaranov/go-openai"
+)
+
+func (p *Client) Request(c echo.Context) error {
+	message := c.Param("message")
+	fmt.Println(message)
+
+	if isSwitch, err := p.Switcher(c, message); isSwitch {
+		return err
+	}
+
+	ctx, cancel := context.WithTimeout(p.ctx, 180*time.Second)
+	defer cancel()
+
+	his = append(his, gogpt.ChatCompletionMessage{
+		Role:    "user",
+		Content: message,
+	})
+	req := gogpt.ChatCompletionRequest{
+		Model:    p.UseModel(),
+		Messages: his,
+	}
+
+	res, err := p.gpt.CreateChatCompletion(ctx, req)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"code":   "error",
+			"answer": err.Error(),
+		})
+	}
+
+	if len(res.Choices) <= 0 {
+		return c.JSON(http.StatusOK, map[string]any{
+			"code":   "error",
+			"answer": "nothing answer",
+		})
+	}
+
+	his = append(his, gogpt.ChatCompletionMessage{
+		Role:    "assistant",
+		Content: res.Choices[0].Message.Content,
+	})
+
+	go p.BouyomiSpeaking(res.Choices[0].Message.Content)
+	// go p.VoxSpeaking(res.Choices[0].Message.Content)
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"code":   "success",
+		"answer": res.Choices[0].Message.Content,
+	})
+}
+
+func (p *Client) RequestForStream(c echo.Context) error {
+	message := c.Param("message")
+	fmt.Println(message)
+
+	if isSwitch, err := p.Switcher(c, message); isSwitch {
+		return err
+	}
+
+	ctx, cancel := context.WithTimeout(p.ctx, 180*time.Second)
+	defer cancel()
+
+	his = append(his, gogpt.ChatCompletionMessage{
+		Role:    "user",
+		Content: message,
+	})
+	req := gogpt.ChatCompletionRequest{
+		Model:    p.UseModel(),
+		Messages: his,
+	}
+
+	stream, err := p.gpt.CreateChatCompletionStream(ctx, req)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"code":   "error",
+			"answer": err.Error(),
+		})
+	}
+	defer stream.Close()
+
+	if stream.GetResponse().StatusCode != http.StatusOK {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"code":   "error",
+			"answer": stream.GetResponse().Status,
+		})
+	}
+
+	var (
+		texts    []string
+		readText string
+	)
+	for {
+		resp, err := stream.Recv()
+		if errors.Is(err, io.EOF) {
+			break
+		} else if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]any{
+				"code":   "error",
+				"answer": fmt.Sprintf("Stream error: %v", err),
+			})
+		}
+
+		texts = append(texts, resp.Choices[0].Delta.Content)
+		readText += resp.Choices[0].Delta.Content
+		if strings.HasSuffix(readText, "。") {
+			go p.BouyomiSpeaking(readText)
+			readText = ""
+		}
+	}
+
+	text := strings.Join(texts, "")
+	his = append(his, gogpt.ChatCompletionMessage{
+		Role:    "assistant",
+		Content: text,
+	})
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"code":   "success",
+		"answer": text,
+	})
+}

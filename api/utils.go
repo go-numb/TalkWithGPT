@@ -65,7 +65,7 @@ func (p *Client) BouyomiSpeaking(s string) {
 		return
 	}
 
-	ctx, cacel := context.WithTimeout(context.Background(), 120*time.Second)
+	ctx, cacel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cacel()
 
 L:

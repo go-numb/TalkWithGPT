@@ -5,6 +5,7 @@ go 1.20
 require (
 	github.com/go-numb/go-bouyomichan v0.0.0-20230302235630-118c2426df2d
 	github.com/go-numb/go-voicevox v0.0.0-20230211204959-e433f5c83d0b
+	github.com/go-numb/my-prompts v0.0.0-20230319151429-90a0464c621c
 	github.com/labstack/echo/v4 v4.10.2
 	github.com/rs/zerolog v1.29.0
 	github.com/sashabaranov/go-openai v1.5.2
@@ -12,7 +13,6 @@ require (
 )
 
 require (
-	github.com/go-numb/my-prompts v0.0.0-20230319151429-90a0464c621c // indirect
 	github.com/gocarina/gocsv v0.0.0-20230226133904-70c27cb2918a // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/hajimehoshi/oto v1.0.1 // indirect

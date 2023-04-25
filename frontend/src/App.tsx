@@ -27,7 +27,9 @@ function App() {
         const utterThis = new SpeechSynthesisUtterance(result.answer);
         utterThis.voice = synth.getVoices()[2];
         synth.speak(utterThis);
-        setGptResponse(result.answer);
+        if (result.answer != null) {
+            setGptResponse(result.answer);
+        }
         setLoading(false);
     }
     const debouncedSendToChatGPT = debounce(sendToChatGPT, 100, false);
