@@ -13,7 +13,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog/log"
-	gogpt "github.com/sashabaranov/go-openai"
 )
 
 var (
@@ -47,38 +46,36 @@ func (p *Client) Switcher(c echo.Context, message string) (isSwitch bool, err er
 		strings.HasPrefix(q, "履歴リセット") ||
 		strings.HasPrefix(q, "履歴りせっと") {
 		// System sayを残す
-		temp := make([]gogpt.ChatCompletionMessage, 0)
-		for i := 0; i < len(his); i++ {
-			if his[i].Role != "system" {
-				continue
-			}
-			temp = append(temp, his[i])
-		}
-
-		// System command promptsを残す
-		his = temp
+		ResetHistories()
 		return isSwitch, c.JSON(http.StatusOK, map[string]any{
-			"code":  "success, reset histories",
-			"error": "success",
+			"code":   "success",
+			"answer": "success, reset histories",
 		})
 	}
 
 	// Change model
-	if strings.HasPrefix(q, "モデル") {
+	if q == "モデル" ||
+		q == "モデル。" {
+		go p.BouyomiSpeaking(fmt.Sprintf("現在のモデルは%sです。", p.UseModel()))
+		return isSwitch, c.JSON(http.StatusOK, map[string]any{
+			"code":   "success",
+			"answer": "success, use model: " + p.UseModel(),
+		})
+	} else if strings.HasPrefix(q, "モデル") {
 		temp := strings.Replace(q, "モデル", "", 1)
 		if strings.HasPrefix(temp, "3.5") {
-			p.SetModel(gogpt.GPT3Dot5Turbo0301)
+			p.SetModel(MODELGPT3_5)
 			go p.BouyomiSpeaking("モデル3.5に切り替え。")
 			return isSwitch, c.JSON(http.StatusOK, map[string]any{
 				"code":   "success",
-				"answer": "success, set model: " + gogpt.GPT3Dot5Turbo0301,
+				"answer": "success, set model: " + p.UseModel(),
 			})
 		} else if strings.HasPrefix(temp, "4.0") {
-			p.SetModel(gogpt.GPT40314)
+			p.SetModel(MODELGPT4)
 			go p.BouyomiSpeaking("モデル4.0に切り替え。")
 			return isSwitch, c.JSON(http.StatusOK, map[string]any{
 				"code":   "success",
-				"answer": "success, set model: " + gogpt.GPT3Dot5Turbo0301,
+				"answer": "success, set model: " + p.UseModel(),
 			})
 		}
 	}
@@ -124,11 +121,42 @@ func (p *Client) Switcher(c echo.Context, message string) (isSwitch bool, err er
 				"answer": err.Error(),
 			})
 		}
+
+		say = fmt.Sprintf("%s、 履歴をリセットしました。", say)
+
+		// System sayを残す
+		ResetHistories()
+
 		go p.BouyomiSpeaking(say)
 
 		return isSwitch, c.JSON(http.StatusOK, map[string]any{
 			"code":   "success",
 			"answer": say,
+		})
+	}
+
+	// 現在の配列最後を読み上げる
+	if strings.HasPrefix(q, "履歴復習") ||
+		strings.HasPrefix(q, "履歴復讐") ||
+		strings.HasPrefix(q, "履歴復習。") ||
+		strings.HasPrefix(q, "履歴復讐。") {
+		var (
+			say        []string
+			returntext []string
+		)
+		for i := 0; i < len(his); i++ {
+			returntext = append(returntext, his[i].Content)
+			if his[i].Role != "assistant" {
+				continue
+			}
+			say = append(say, his[i].Content)
+		}
+
+		go p.BouyomiSpeaking(strings.Join(say, "\n\n"))
+
+		return isSwitch, c.JSON(http.StatusOK, map[string]any{
+			"code":   "success",
+			"answer": strings.Join(returntext, "\n\n"),
 		})
 	}
 

@@ -24,34 +24,33 @@ func (p *Client) SetPrompt(key, prompt string) {
 		prompt = prompts[key].Command
 	}
 
-	ctx, cancel := context.WithTimeout(p.ctx, 60*time.Second)
-	defer cancel()
-
 	his = append(his, gogpt.ChatCompletionMessage{
 		Role:    "system",
 		Content: prompt,
 	})
-	req := gogpt.ChatCompletionRequest{
-		Model:    p.UseModel(),
-		Messages: his,
-	}
 
-	res, err := p.gpt.CreateChatCompletion(ctx, req)
-	if err != nil {
-		log.Err(err).Msg("request error")
-		return
-	}
+	// 初回プロンプトはリクエストする必要がない
+	// req := gogpt.ChatCompletionRequest{
+	// 	Model:    p.UseModel(),
+	// 	Messages: his,
+	// }
 
-	if len(res.Choices) == 0 {
-		log.Error().Msg("has not choices")
-		return
-	}
+	// res, err := p.gpt.CreateChatCompletion(ctx, req)
+	// if err != nil {
+	// 	log.Err(err).Msg("request error")
+	// 	return
+	// }
 
-	his = append(his, gogpt.ChatCompletionMessage{
-		Role:    "assistant",
-		Content: res.Choices[0].Message.Content,
-	})
-	log.Info().Msgf("set prompt: %s, assistant says %s", prompt, res.Choices[0].Message.Content)
+	// if len(res.Choices) == 0 {
+	// 	log.Error().Msg("has not choices")
+	// 	return
+	// }
+
+	// his = append(his, gogpt.ChatCompletionMessage{
+	// 	Role:    "assistant",
+	// 	Content: res.Choices[0].Message.Content,
+	// })
+	// log.Info().Msgf("set prompt: %s, assistant says %s", prompt, res.Choices[0].Message.Content)
 }
 
 func (p *Client) BouyomiSpeaking(s string) {
@@ -83,6 +82,8 @@ L:
 			time.Sleep(time.Second)
 		}
 	}
+
+	fmt.Println("break")
 }
 
 // VoxSpeaking メモリ使用しまくり
@@ -145,4 +146,17 @@ func Save(histories []gogpt.ChatCompletionMessage) (string, error) {
 	f.WriteString(strings.Join(contents, "\n\n"))
 
 	return "保存しました", nil
+}
+
+func ResetHistories() {
+	temp := make([]gogpt.ChatCompletionMessage, 0)
+	for i := 0; i < len(his); i++ {
+		if his[i].Role != "system" {
+			continue
+		}
+		temp = append(temp, his[i])
+	}
+
+	// System command promptsを残す
+	his = temp
 }

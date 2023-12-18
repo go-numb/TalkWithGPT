@@ -8,11 +8,13 @@ require (
 	github.com/go-numb/my-prompts v0.0.0-20230319151429-90a0464c621c
 	github.com/labstack/echo/v4 v4.10.2
 	github.com/rs/zerolog v1.29.0
-	github.com/sashabaranov/go-openai v1.5.2
+	github.com/sashabaranov/go-openai v1.17.9
+	github.com/tiktoken-go/tokenizer v0.1.0
 	github.com/webview/webview v0.0.0-20230210061304-7b40e46d97e9
 )
 
 require (
+	github.com/dlclark/regexp2 v1.9.0 // indirect
 	github.com/gocarina/gocsv v0.0.0-20230226133904-70c27cb2918a // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/hajimehoshi/oto v1.0.1 // indirect

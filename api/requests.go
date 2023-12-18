@@ -13,6 +13,14 @@ import (
 	gogpt "github.com/sashabaranov/go-openai"
 )
 
+const (
+	MODELGPT4     = "gpt-4-1106-preview"
+	MODELGPT4LONG = "gpt-4-1106-preview"
+
+	MODELGPT3_5     = gogpt.GPT3Dot5Turbo
+	MODELGPT3_5LONG = gogpt.GPT3Dot5Turbo16K
+)
+
 func (p *Client) Request(c echo.Context) error {
 	message := c.Param("message")
 	fmt.Println(message)
@@ -28,6 +36,15 @@ func (p *Client) Request(c echo.Context) error {
 		Role:    "user",
 		Content: message,
 	})
+
+	// Token数に応じて、長文を扱うモデルに変える
+	var temptext string
+	for i := 0; i < len(his); i++ {
+		temptext += his[i].Content
+	}
+	ids, _, _ := p.tokenizer.Encode(temptext)
+	p._switchModel(len(ids))
+
 	req := gogpt.ChatCompletionRequest{
 		Model:    p.UseModel(),
 		Messages: his,
@@ -58,7 +75,7 @@ func (p *Client) Request(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, map[string]any{
 		"code":   "success",
-		"answer": res.Choices[0].Message.Content,
+		"answer": fmt.Sprintf("%s\n\nmodel: %s, tokens: %d", res.Choices[0].Message.Content, p.UseModel(), len(ids)),
 	})
 }
 
@@ -77,6 +94,15 @@ func (p *Client) RequestForStream(c echo.Context) error {
 		Role:    "user",
 		Content: message,
 	})
+
+	// Token数に応じて、長文を扱うモデルに変える
+	var temptext string
+	for i := 0; i < len(his); i++ {
+		temptext += his[i].Content
+	}
+	ids, _, _ := p.tokenizer.Encode(temptext)
+	p._switchModel(len(ids))
+
 	req := gogpt.ChatCompletionRequest{
 		Model:    p.UseModel(),
 		Messages: his,
@@ -91,12 +117,12 @@ func (p *Client) RequestForStream(c echo.Context) error {
 	}
 	defer stream.Close()
 
-	if stream.GetResponse().StatusCode != http.StatusOK {
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"code":   "error",
-			"answer": stream.GetResponse().Status,
-		})
-	}
+	// if stream.GetResponse().StatusCode != http.StatusOK {
+	// 	return c.JSON(http.StatusBadRequest, map[string]any{
+	// 		"code":   "error",
+	// 		"answer": stream.GetResponse().Status,
+	// 	})
+	// }
 
 	var (
 		texts    []string
@@ -109,17 +135,23 @@ func (p *Client) RequestForStream(c echo.Context) error {
 		} else if err != nil {
 			return c.JSON(http.StatusBadRequest, map[string]any{
 				"code":   "error",
-				"answer": fmt.Sprintf("Stream error: %v", err),
+				"answer": fmt.Sprintf("stream read error: %v", err),
 			})
 		}
 
 		texts = append(texts, resp.Choices[0].Delta.Content)
 		readText += resp.Choices[0].Delta.Content
-		if strings.HasSuffix(readText, "。") {
+
+		if _cutSmallPiece(readText) {
 			go p.BouyomiSpeaking(readText)
 			readText = ""
 		}
 	}
+
+	if len([]rune(readText)) > 1 {
+		go p.BouyomiSpeaking(readText)
+	}
+	readText = ""
 
 	text := strings.Join(texts, "")
 	his = append(his, gogpt.ChatCompletionMessage{
@@ -129,6 +161,38 @@ func (p *Client) RequestForStream(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, map[string]any{
 		"code":   "success",
-		"answer": text,
+		"answer": fmt.Sprintf("%s\n\nmodel: %s, tokens: %d", text, p.UseModel(), len(ids)),
 	})
+}
+
+// 長い文章を句読点などで一時区切りする
+var suffix = []string{"。", "！", "？"}
+
+// _cutSmallPiece 長い文章を句読点などで一時区切りする
+func _cutSmallPiece(q string) bool {
+	for _, s := range suffix {
+		if strings.HasSuffix(q, s) && len([]rune(q)) > 1 {
+			return true
+		}
+	}
+	return false
+}
+
+func (p *Client) _switchModel(n int) {
+	if strings.HasPrefix(p.useModel, "gpt-4") {
+		if n > 7500 {
+			p.SetModel(MODELGPT4LONG)
+		} else {
+			p.SetModel(MODELGPT4)
+		}
+		return
+	}
+
+	// using base GPT3.5
+	if n > 3500 {
+		p.SetModel(MODELGPT3_5LONG)
+	} else {
+		p.SetModel(MODELGPT3_5)
+	}
+
 }

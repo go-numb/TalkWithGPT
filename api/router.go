@@ -10,16 +10,20 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	gogpt "github.com/sashabaranov/go-openai"
+	"github.com/tiktoken-go/tokenizer"
+
+	"github.com/rs/zerolog/log"
 )
 
 var his []gogpt.ChatCompletionMessage
 
 type Client struct {
-	ctx      context.Context
-	gpt      *gogpt.Client
-	useModel string
-	bouyomi  *bouyomichan.Client
-	voicevox *voicevox.Client
+	ctx       context.Context
+	gpt       *gogpt.Client
+	tokenizer tokenizer.Codec
+	useModel  string
+	bouyomi   *bouyomichan.Client
+	voicevox  *voicevox.Client
 }
 
 func New(model string) *Client {
@@ -29,12 +33,18 @@ func New(model string) *Client {
 		fmt.Println(t[i])
 	}
 
+	enc, err := tokenizer.Get(tokenizer.P50kEdit)
+	if err != nil {
+		log.Fatal().Msgf("gpt tokenizer, %s", err)
+	}
+
 	return &Client{
-		ctx:      context.Background(),
-		gpt:      gogpt.NewClient(os.Getenv("CHATGPTTOKEN")),
-		useModel: model,
-		bouyomi:  bouyomichan.New("localhost:50001"),
-		voicevox: v,
+		ctx:       context.Background(),
+		gpt:       gogpt.NewClient(os.Getenv("CHATGPTTOKEN")),
+		tokenizer: enc,
+		useModel:  model,
+		bouyomi:   bouyomichan.New("localhost:50001"),
+		voicevox:  v,
 	}
 }
 
