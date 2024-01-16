@@ -10,7 +10,7 @@ require (
 	github.com/rs/zerolog v1.29.0
 	github.com/sashabaranov/go-openai v1.17.9
 	github.com/tiktoken-go/tokenizer v0.1.0
-	github.com/webview/webview v0.0.0-20230210061304-7b40e46d97e9
+	github.com/webview/webview_go v0.0.0-20230901181450-5a14030a9070
 )
 
 require (

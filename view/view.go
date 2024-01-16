@@ -1,7 +1,7 @@
 package view
 
 import (
-	"github.com/webview/webview"
+	webview "github.com/webview/webview_go"
 )
 
 func Web(isDebug bool) {
@@ -9,11 +9,11 @@ func Web(isDebug bool) {
 	// b, _ := io.ReadAll(f)
 	// f.Close()
 
-	w := webview.New(isDebug)
+	w := webview.New(true)
 	defer w.Destroy()
 
 	w.SetTitle("Talk with ChatGPT")
-	w.SetSize(480, 490, webview.HintNone)
+	w.SetSize(480, 920, webview.HintNone)
 	// w.SetHtml(string(b))
 	w.Navigate("http://localhost:5173/")
 	w.Run()

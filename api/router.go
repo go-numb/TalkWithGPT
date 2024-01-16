@@ -54,5 +54,5 @@ func (p *Client) Router() {
 
 	e.GET("/api/:message", p.RequestForStream)
 
-	e.Logger.Fatal(e.Start(":8081"))
+	e.Logger.Fatal(e.Start("localhost:8081"))
 }
