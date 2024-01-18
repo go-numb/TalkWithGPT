@@ -28,9 +28,11 @@ function App() {
         setLoading(true);
         const res = await fetch(`http://localhost:8081/api/${transcript}`)
         const result = await res.json();
-        const utterThis = new SpeechSynthesisUtterance(result.answer);
-        utterThis.voice = synth.getVoices()[2];
-        synth.speak(utterThis);
+
+        // API側で喋らせているので不要
+        // const utterThis = new SpeechSynthesisUtterance(result.answer);
+        // utterThis.voice = synth.getVoices()[2];
+        // synth.speak(utterThis);
         if (result.answer != null) {
             setGptResponse(result.answer);
         }
@@ -43,9 +45,9 @@ function App() {
     const [loading2, setLoading2] = useState(false);
     const sendToAPI = async () => {
         setLoading2(true);
-        console.log(`http://localhost:8081/api/${text}`);
+        console.log(`http://localhost:8081/api/` + encodeURI(text));
 
-        const res = await fetch(`http://localhost:8081/api/${text}`)
+        const res = await fetch(`http://localhost:8081/api/` + encodeURI(text))
         const result = await res.json();
 
         console.log(result.answer);
@@ -57,6 +59,10 @@ function App() {
             const tempText2 = history.join()
             setContent((prev) => prev + "\n\n" + tempText)
             setText("")
+
+            // 入力フォームにフォーカス
+            const textField = document.getElementById("textinput") as HTMLInputElement;
+            textField?.focus()
         }
 
 
@@ -122,8 +128,20 @@ function App() {
                 </ReactMarkdown>
 
                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    <textarea rows={5} cols={50} value={text} onChange={handleChangeText} />
+                    <textarea id="textinput" rows={5} cols={50} value={text} onChange={handleChangeText} />
                     <input type="submit" style={{ textAlign: "right" }} onClick={sendToAPI} value="Send" />
+                </div>
+                <div>
+                    <pre style={{ fontSize: '0.5rem', color: '#bdbdbd' }}>
+                        <ul>
+                            <li>履歴リセット</li>
+                            <li>モデル4.0</li>
+                            <li>メモして</li>
+                            <li>メモ、XXX読み込み</li>
+                            <li>履歴復習</li>
+                            <li>読み上げ</li>
+                        </ul>
+                    </pre>
                 </div>
 
             </TabPanel>
