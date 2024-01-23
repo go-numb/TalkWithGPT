@@ -1,11 +1,11 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"talkgpt/api"
-	"talkgpt/view"
 
 	"github.com/rs/zerolog/log"
 	gogpt "github.com/sashabaranov/go-openai"
@@ -27,15 +27,26 @@ var (
 )
 
 func main() {
-	go startFrontend()
-
 	model := gogpt.GPT3Dot5Turbo
 	c := api.New(model)
 	c.SetPrompt("", SetUpPrompt)
 
 	go c.Router()
 
-	view.Web(false)
+	// アプリブラウザが閉じられるまで待機
+	// t := time.NewTicker(1 * time.Minute)
+	// defer t.Stop()
+
+	// for {
+	// 	<-t.C
+
+	// 	if backgroundPID != 0 {
+	// 		log.Fatal().Msg("tauri app closed")
+	// 		break
+	// 	}
+	// }
+
+	startFrontend()
 
 	process, err := os.FindProcess(backgroundPID)
 	if err != nil {
@@ -54,8 +65,8 @@ func startFrontend() {
 	cmd := exec.Command("npm", "run", "tauri", "dev")
 	cmd.Dir = "./src"
 
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	// cmd.Stdout = os.Stdout
+	// cmd.Stderr = os.Stderr
 	err := cmd.Start()
 	if err != nil {
 		log.Info().Err(err)
@@ -65,9 +76,8 @@ func startFrontend() {
 	fmt.Println("npm pid:", backgroundPID)
 
 	if err := cmd.Wait(); err != nil {
-		log.Fatal().Err(err)
+		log.Fatal().Err(errors.Join(err, errors.New("tauri app closed")))
 		return
 	}
-	fmt.Println("Server closed")
-
+	fmt.Println("tauri server closed")
 }

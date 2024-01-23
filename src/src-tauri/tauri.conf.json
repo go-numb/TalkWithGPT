@@ -37,8 +37,8 @@
         "fullscreen": false,
         "resizable": true,
         "title": "src",
-        "width": 800,
-        "height": 600
+        "width": 480,
+        "height": 920
       }
     ]
   }
