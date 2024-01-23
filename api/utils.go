@@ -57,7 +57,7 @@ func (p *Client) BouyomiSpeaking(s string) {
 	p.bouyomi.Speed = 88
 	p.bouyomi.Tone = 105
 	// p.bouyomi.Voice = bouyomichan.VoiceDefault
-	p.bouyomi.Voice = 10027 // Voicevox 冥鳴ひまり ノーマル
+	p.bouyomi.Voice = 10002 // Voicevox 冥鳴ひまり ノーマル
 	p.bouyomi.Volume = 110
 	if err := p.bouyomi.Speaking(s); err != nil {
 		log.Err(err).Msg("")

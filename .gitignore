@@ -3,3 +3,5 @@ node_modules
 _data/*.txt
 _data/*.md
 _data
+
+frontend

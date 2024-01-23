@@ -51,14 +51,14 @@ func main() {
 }
 
 func startFrontend() {
-	cmd := exec.Command("npm", "run", "dev")
-	cmd.Dir = "./frontend"
+	cmd := exec.Command("npm", "run", "tauri", "dev")
+	cmd.Dir = "./src"
 
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Start()
 	if err != nil {
-		log.Err(err).Msg("")
+		log.Info().Err(err)
 	}
 
 	backgroundPID = cmd.Process.Pid
