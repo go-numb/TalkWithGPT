@@ -65,8 +65,8 @@ func startFrontend() {
 	cmd := exec.Command("npm", "run", "tauri", "dev")
 	cmd.Dir = "./src"
 
-	// cmd.Stdout = os.Stdout
-	// cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 	err := cmd.Start()
 	if err != nil {
 		log.Info().Err(err)

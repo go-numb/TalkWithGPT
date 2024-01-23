@@ -1,5 +1,5 @@
-import './App.css'
-import "babel-polyfill";
+import './App.css';
+import 'babel-polyfill';
 import { useEffect, useState } from "react";
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import { debounce } from 'underscore';
@@ -51,13 +51,15 @@ function App() {
         const res = await fetch(`http://localhost:8081/api/` + encodeURI(text))
         const result = await res.json();
 
+
+
         console.log(result.answer);
         if (result.answer != null) {
-            const tempText = "#### " + text + "\n:  " + result.answer;
+            const tempText = "#### " + text + `\n:  ` + result.answer;
             setHistory((prev) => [...prev, tempText])
 
 
-            setContent((prev) => prev + "\n\n" + tempText)
+            setContent((prev) => prev + `\n` + tempText)
             setText("")
 
             // 入力フォームにフォーカス
@@ -114,6 +116,13 @@ function App() {
                 </ReactMarkdown>
             </TabPanel>
             <TabPanel>
+                <ReactMarkdown
+                    rehypePlugins={[rehypeKatex]}
+                    remarkPlugins={[remarkMath]}>
+                    {content}
+                </ReactMarkdown>
+
+                <div style={{marginTop: '1rem', marginBottom: '1rem'}}>
                 {loading2 ?
                     <div className="loader">
                         <div className="inner one"></div>
@@ -121,12 +130,8 @@ function App() {
                         <div className="inner three"></div>
                     </div>
                     : ''}
-                <ReactMarkdown
-                    rehypePlugins={[rehypeKatex]}
-                    remarkPlugins={[remarkMath]}>
-                    {content}
-                </ReactMarkdown>
-
+                </div>
+                
                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                     <textarea id="textinput" rows={5} cols={50} value={text} onChange={handleChangeText} />
                     <input type="submit" style={{ textAlign: "right" }} onClick={sendToAPI} value="Send" />

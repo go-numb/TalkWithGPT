@@ -1,10 +1,27 @@
 #root {
+  font-family: Consolas, 'Courier New', 'Yu Gothic UI', monospace;
   width: 90%;
   position: absolute;
 	top: 0; left: 0;
   margin-top: 2rem;
   margin-left: 2rem;
   text-align: left;
+}
+
+code {
+  font-family: Consolas, 'Courier New', 'Yu Gothic UI', monospace;
+}
+
+pre {
+  font-family: Consolas, 'Courier New', 'Yu Gothic UI', monospace;
+}
+
+input {
+  font-family: Consolas, 'Courier New', 'Yu Gothic UI', monospace;
+}
+
+textarea {
+  font-family: Consolas, 'Courier New', 'Yu Gothic UI', monospace;
 }
 
 .react-tabs__tab-list {
